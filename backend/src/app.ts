@@ -1,10 +1,9 @@
+import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 import routes from './routes';
 import cors from 'cors';
 const PORT = process.env.PORT || 3000;
-
-console.clear();
 
 const app = express();
 app.use(cors());
@@ -14,8 +13,8 @@ app.use('/api', routes);
 
 async function start() {
   try {
-    await mongoose.connect('mongodb+srv://maksee1337:sjsfG8NCm0DnyrcC@cluster0.s6csa3y.mongodb.net/byte_cloud');
-
+    const mongo_uri: string | any = process.env.MONGO_URI;
+    await mongoose.connect(mongo_uri);
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
@@ -23,5 +22,4 @@ async function start() {
     console.log(e);
   }
 }
-
 start();
