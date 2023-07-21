@@ -11,7 +11,6 @@ export class PostDataService {
       successfulObjects: [],
       wrongFormat: [],
     };
-
     if (Array.isArray(stringArray)) {
       stringArray.forEach((item: string) => {
         try {
@@ -22,7 +21,6 @@ export class PostDataService {
         }
       });
     }
-
     return result;
   }
 
@@ -51,5 +49,13 @@ export class PostDataService {
       this.addToDatabase(appointments, AppointmentModel),
     ]);
     return { savedPatients, savedDoctors, savedAppointments };
+  }
+
+  public async updateAppointments(data: any) {
+    const promises = [];
+    for (let i = 0; i < data.length; i++) {
+      promises.push(AppointmentModel.findByIdAndUpdate(data[i]._id, { time: data[i].time }));
+    }
+    await Promise.all(promises);
   }
 }

@@ -1,5 +1,5 @@
 export default function isValidDate(date: string) {
-  let dateformat = /^(0?[1-9]|[1-2][0-9]|3[01])-(0?[1-9]|1[0-2])/;
+  let dateformat = /^(0?[1-9]|[1-2][0-9]|3[01]).(0?[1-9]|1[0-2])/;
 
   // Matching the date through regular expression
   if (date.match(dateformat)) {

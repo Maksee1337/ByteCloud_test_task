@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    .info {
+        margin-left: 20px;
+        width: 300px;
+        height: 500px;
+        resize: none;
+
+    }
+</style>
+<body>
+
+<div style="display: flex">
+    <div>
+        <label>
+            <textarea id="patients" class="info" placeholder="patients"></textarea>
+        </label>
+        <label>
+        <textarea id="doctors" class="info" placeholder="doctors"></textarea>
+    </label>
+        <label>
+        <textarea id="appointments" class="info" placeholder="appointments"></textarea>
+    </label>
+    </div>
+</div>
+<button id="saveButton" class="saveButton">Save Data</button>
+<button id="clearDB" class="saveButton">Clear BD</button>
+<script type="module">
+    import {postData} from './postData.js';
+    postData();
+</script>
+</body>
+</html>

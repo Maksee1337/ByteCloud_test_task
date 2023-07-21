@@ -35,12 +35,16 @@ export class TablesService {
         obj[el.id].appointments = {};
         return obj;
       }, {});
-    const appointments = (await AppointmentModel.find()).map((el) => {
+
+    let appointments: any[] = await AppointmentModel.find();
+    if (!appointments.length) return { leftTable: [], rightTable: [] };
+    appointments = appointments.filter((el) => {
+      return doctors[el.doctorId] && patients[el.patientId];
+    });
+    appointments = appointments.map((el) => {
       const json: any = el.toJSON();
       return {
         ...json,
-        // patient: patients[json.patientId],
-        // doctor: doctors[json.doctorId],
         commonHours: this.getCommonElements(patients[json.patientId].hours, doctors[json.doctorId].hours),
       };
     });
@@ -49,12 +53,18 @@ export class TablesService {
     let rightTable: any; //this.getRightTable(patients, doctors, appointments);
     let max = { greens: 0, blues: 0 };
     let betterResult = {};
-    for (let i = 0; i < 2000; i++) {
+    let appIndex = 0;
+
+    appointments.forEach((appointment) => {
+      this.changeAppointmentTime(appointment, appointment.commonHours[0]);
+    });
+    const findBetterResult = () => {
       const a = Math.floor(Math.random() * appointments.length);
       this.changeAppointmentTime(
         appointments[a],
         appointments[a].commonHours[Math.floor(Math.random() * appointments[a].commonHours.length)],
       );
+
       rightTable = this.compareTables(leftTable, this.getRightTable(patients, doctors, appointments));
       const { greens, blues } = rightTable.reduce(
         (sum: any, item: any) => {
@@ -65,7 +75,6 @@ export class TablesService {
         },
         { greens: 0, blues: 0 },
       );
-      // console.log(rightTable, sum);
       if (
         greens + blues > max.greens + max.blues ||
         (greens + blues === max.greens + max.blues && greens > max.greens)
@@ -74,8 +83,10 @@ export class TablesService {
         max.blues = blues;
         betterResult = [...rightTable];
       }
+    };
+    for (let i = 0; i < 10000; i++) {
+      findBetterResult();
     }
-
     return { leftTable, rightTable: betterResult };
   }
   private compareTables(original: any[], newTable: any[]) {
@@ -89,56 +100,51 @@ export class TablesService {
     });
   }
   private getRightTable(_patients: any, _doctors: any, _appointments: any) {
-    const patients = deepCopy(_patients);
-    const doctors = deepCopy(_doctors);
-    const appointments = _appointments.map((e: any) => ({ ...e, color: undefined }));
-    appointments.map((appointment: any) => {
-      appointment.color = 'red';
-      if (doctors[appointment.doctorId] && patients[appointment.patientId] && appointment.commonHours.length) {
-        appointment.color = 'green';
-        if (!doctors[appointment.doctorId].appointments[appointment.time]) {
-          doctors[appointment.doctorId].appointments[appointment.time] = [appointment];
-        } else {
-          doctors[appointment.doctorId].appointments[appointment.time].forEach((app: any) => {
-            app.color = 'red';
-          });
-          appointment.color = 'green';
-          doctors[appointment.doctorId].appointments[appointment.time].push(appointment);
-        }
-      }
-    });
-
-    return appointments.map((appointment: any) => {
-      return {
-        patientId: appointment.patientId,
-        doctorId: appointment.doctorId,
-        time: appointment.time,
-        color: appointment.color,
-      };
-    });
+    return this.getLeftTable(_patients, _doctors, _appointments, ['green', 'red', 'red', 'green']);
   }
-  private getLeftTable(_patients: any, _doctors: any, _appointments: any) {
+
+  private getLeftTable(
+    _patients: any,
+    _doctors: any,
+    _appointments: any,
+    colors: string[] = ['green', 'yellow', 'red', 'yellow'],
+  ) {
     const patients = deepCopy(_patients);
     const doctors = deepCopy(_doctors);
     const appointments = _appointments.map((e: any) => ({ ...e, color: undefined }));
     appointments.map((appointment: any) => {
-      appointment.color = 'red';
+      appointment.color = colors[2];
       if (doctors[appointment.doctorId] && patients[appointment.patientId] && appointment.commonHours.length) {
-        appointment.color = 'green';
+        appointment.color = colors[0];
         if (!doctors[appointment.doctorId].appointments[appointment.time]) {
           doctors[appointment.doctorId].appointments[appointment.time] = [appointment];
         } else {
           doctors[appointment.doctorId].appointments[appointment.time].forEach((app: any) => {
-            app.color = 'yellow';
+            app.color = colors[1];
           });
           doctors[appointment.doctorId].appointments[appointment.time].push(appointment);
-          appointment.color = 'yellow';
+          appointment.color = colors[3];
+        }
+
+        if (!patients[appointment.patientId].appointments[appointment.time]) {
+          patients[appointment.patientId].appointments[appointment.time] = [appointment];
+        } else {
+          patients[appointment.patientId].appointments[appointment.time].forEach((app: any) => {
+            app.color = colors[1];
+          });
+          patients[appointment.patientId].appointments[appointment.time].push(appointment);
+          appointment.color = colors[3];
         }
       }
     });
 
     return appointments.map((appointment: any) => {
       return {
+        _id: appointment._id,
+        patientInfo: {
+          ...patients[appointment.patientId],
+          appointments: undefined,
+        },
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
         time: appointment.time,

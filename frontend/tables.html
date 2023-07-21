@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    .table {
+        border: 1px solid black;
+        margin-left: 20px;
+        width: 300px;
+        height: 500px;
+        padding: 5px;
+        overflow-y: auto;
+    }
+
+    .item {
+        border: 1px solid black;
+        width: 100%;
+        height: 30px;
+        margin-bottom: 5px;
+    }
+
+    .item button {
+        margin-left: 20px;
+    }
+    .saveButton {
+        margin: 10px 20px;
+        width: 150px;
+    }
+
+    .info {
+        margin-left: 20px;
+        width: 500px;
+        height: 500px;
+        resize: none;
+
+    }
+</style>
+<body>
+
+<div style="display: flex">
+    <div class="table" id="leftTable"></div>
+    <div>
+        <div class="table" id="rightTable"></div>
+        <button id="saveButton" class="saveButton">Save Data</button>
+    </div>
+    <div>
+        <label>
+            <textarea id="infoTextarea" readonly class="info"></textarea>
+        </label>
+    </div>
+</div>
+<script type="module">
+    import {tables} from './tables.js';
+    tables();
+</script>
+</body>
+</html>
