@@ -6,28 +6,31 @@ import { TablesService } from './services/tables.service';
 const router = express.Router();
 const postDataService = new PostDataService();
 const clearDBService = new ClearDBService();
-const leftTableService = new TablesService();
+const tablesService = new TablesService();
 
 router.post('/', async (req, res) => {
   const result = await postDataService.addData(req.body);
+  await tablesService.calculateAppointments();
   sendEvent();
   res.json(result);
 });
 
 router.patch('/', async (req, res) => {
   const result = await postDataService.updateAppointments(req.body);
+  await tablesService.updateTables(req.body);
   sendEvent();
   res.json(result);
 });
 
 router.delete('/', async (req, res) => {
   const result = await clearDBService.clearDB();
+  await tablesService.calculateAppointments();
   sendEvent();
   res.json(result);
 });
 
 router.get('/', async (req, res) => {
-  const { leftTable, rightTable } = await leftTableService.getTablesData();
+  const { leftTable, rightTable } = await tablesService.getTablesData();
   res.json([leftTable, rightTable]);
 });
 

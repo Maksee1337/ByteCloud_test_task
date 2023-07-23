@@ -20,7 +20,8 @@ function deepCopy(obj: any) {
   return copy;
 }
 export class TablesService {
-  public async getTablesData() {
+  private tables: any = undefined;
+  public async calculateAppointments() {
     const patients = (await PatientModel.find())
       .map((el) => el.toJSON())
       .reduce((obj: any, el: any) => {
@@ -37,23 +38,27 @@ export class TablesService {
       }, {});
 
     let appointments: any[] = await AppointmentModel.find();
-    if (!appointments.length) return { leftTable: [], rightTable: [] };
+    if (!appointments.length) {
+      this.tables = { leftTable: [], rightTable: [] };
+      return;
+    }
     appointments = appointments.filter((el) => {
       return doctors[el.doctorId] && patients[el.patientId];
     });
     appointments = appointments.map((el) => {
       const json: any = el.toJSON();
+      const commonHours = this.getCommonElements(patients[json.patientId].hours, doctors[json.doctorId].hours);
+
       return {
         ...json,
-        commonHours: this.getCommonElements(patients[json.patientId].hours, doctors[json.doctorId].hours),
+        commonHours,
       };
     });
     const leftTable = this.getLeftTable(patients, doctors, appointments);
 
     let rightTable: any; //this.getRightTable(patients, doctors, appointments);
     let max = { greens: 0, blues: 0 };
-    let betterResult = {};
-    let appIndex = 0;
+    let betterResult: any = [];
 
     appointments.forEach((appointment) => {
       this.changeAppointmentTime(appointment, appointment.commonHours[0]);
@@ -87,7 +92,14 @@ export class TablesService {
     for (let i = 0; i < 10000; i++) {
       findBetterResult();
     }
-    return { leftTable, rightTable: betterResult };
+
+    this.tables = { leftTable, rightTable: betterResult };
+  }
+  public async getTablesData() {
+    if (!this.tables) {
+      await this.calculateAppointments();
+    }
+    return this.tables;
   }
   private compareTables(original: any[], newTable: any[]) {
     return newTable.map((element, index) => {
@@ -112,8 +124,15 @@ export class TablesService {
     const patients = deepCopy(_patients);
     const doctors = deepCopy(_doctors);
     const appointments = _appointments.map((e: any) => ({ ...e, color: undefined }));
-    appointments.map((appointment: any) => {
+    appointments.forEach((appointment: any) => {
       appointment.color = colors[2];
+      if (
+        appointment.commonHours &&
+        appointment.time &&
+        appointment.commonHours.findIndex((el: any) => el === appointment.time) === -1
+      ) {
+        return;
+      }
       if (doctors[appointment.doctorId] && patients[appointment.patientId] && appointment.commonHours.length) {
         appointment.color = colors[0];
         if (!doctors[appointment.doctorId].appointments[appointment.time]) {
@@ -148,7 +167,7 @@ export class TablesService {
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
         time: appointment.time,
-        color: appointment.color,
+        color: appointment.time ? appointment.color : 'red',
       };
     });
   }
@@ -157,5 +176,27 @@ export class TablesService {
   }
   private getCommonElements(array1: number[], array2: number[]) {
     return array1.filter((value) => array2.includes(value));
+  }
+
+  public async updateTables(data: any) {
+    this.tables.rightTable.forEach((el: any, index: number) => {
+      const rightTableElement = el;
+      const leftTableElement = this.tables.leftTable[index];
+      if (rightTableElement.color === 'red') {
+        leftTableElement.color = 'red';
+      } else {
+        leftTableElement.color = 'green';
+        rightTableElement.color = 'green';
+        leftTableElement.time = rightTableElement.time;
+      }
+      console.log(
+        leftTableElement._id.toString(),
+        leftTableElement.time,
+        leftTableElement.color,
+        rightTableElement._id.toString(),
+        rightTableElement.time,
+        rightTableElement.color,
+      );
+    });
   }
 }

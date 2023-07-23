@@ -1,4 +1,5 @@
-import isValidDate from './date.validator';
+import validatorJs from 'validator';
+
 export const validator = {
   id: (id: string) => /^\d+$/.test(id),
   hours: (hours: string) => {
@@ -16,5 +17,5 @@ export const validator = {
     return false;
   },
   name: (name: string) => /^[A-Za-z]+(?: [A-Za-z]+)?$/.test(name),
-  date: isValidDate,
+  date: (date: string) => validatorJs.isDate(date, { format: 'DD.MM.YYYY', strictMode: true, delimiters: ['.'] }),
 };
