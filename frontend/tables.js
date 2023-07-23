@@ -69,7 +69,7 @@ const updateTables = async () => {
     red: 0,
   };
   // leftTable.sort(sortCallback);
-  rightTable.sort(sortCallback);
+  // rightTable.sort(sortCallback);
   leftTable.forEach((element) => {
     const { patientId, doctorId, time, color } = element;
     const text = `${patientId}, ${doctorId}` + (time ? `, ${time}` : "");
