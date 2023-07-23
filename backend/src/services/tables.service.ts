@@ -107,7 +107,6 @@ export class TablesService {
       if (element.color !== 'red') {
         color = element.time === original[index].time ? element.color : 'blue';
       }
-      // console.log([element.color, original[index].color]);
       return color === 'red' ? { ...original[index], color } : { ...element, color };
     });
   }
@@ -189,14 +188,6 @@ export class TablesService {
         rightTableElement.color = 'green';
         leftTableElement.time = rightTableElement.time;
       }
-      console.log(
-        leftTableElement._id.toString(),
-        leftTableElement.time,
-        leftTableElement.color,
-        rightTableElement._id.toString(),
-        rightTableElement.time,
-        rightTableElement.color,
-      );
     });
   }
 }

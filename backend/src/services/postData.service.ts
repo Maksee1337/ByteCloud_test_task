@@ -35,7 +35,6 @@ export class PostDataService {
       const successful = data.successful.filter((item: string) => !duplicates.includes(item));
       return { ...data, duplicates, successful, successfulObjects: undefined };
     }
-    //    console.log(res);
   }
   public async addData(body: AddDataInterface) {
     const [patients, doctors, appointments] = [
