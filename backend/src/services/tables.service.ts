@@ -60,22 +60,15 @@ export class TablesService {
     let max = { greens: 0, blues: 0 };
     let betterResult: any = [];
 
-    let steps = 1;
-    appointments.forEach((appointment: any, index: number) => {
-      steps *= appointment.commonHours.length;
-      appointment.previous = index > 0 ? appointments[index - 1] : undefined;
-      appointment.timeIndex = 0;
-      appointment.addOneHour = () => {
-        appointment.timeIndex++;
-        if (appointment.timeIndex >= appointment.commonHours.length) {
-          appointment.timeIndex = 0;
-          if (appointment.previous) appointment.previous.addOneHour();
-        }
-        appointment.time = appointment.commonHours[appointment.timeIndex];
-      };
+    appointments.forEach((appointment) => {
+      this.changeAppointmentTime(appointment, appointment.commonHours[0]);
     });
     const findBetterResult = () => {
-      appointments[appointments.length - 1].addOneHour();
+      const a = Math.floor(Math.random() * appointments.length);
+      this.changeAppointmentTime(
+        appointments[a],
+        appointments[a].commonHours[Math.floor(Math.random() * appointments[a].commonHours.length)],
+      );
 
       rightTable = this.compareTables(leftTable, this.getRightTable(patients, doctors, appointments));
       const { greens, blues } = rightTable.reduce(
@@ -96,8 +89,7 @@ export class TablesService {
         betterResult = [...rightTable];
       }
     };
-    console.log('steps', steps);
-    for (let i = 0; i < steps; i++) {
+    for (let i = 0; i < 10000; i++) {
       findBetterResult();
     }
 
