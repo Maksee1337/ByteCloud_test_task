@@ -38,7 +38,9 @@ window.showInfo = (id) => {
   infoTextarea.innerHTML = `Patient: ${patient.id}, ${hours}`;
   if (patient.name) infoTextarea.innerHTML += `, ${patient.name}`;
   if (patient.dob) infoTextarea.innerHTML += `, ${patient.dob}`;
-  infoTextarea.innerHTML += `\nDoctor: ${rightTable[index].doctorId}\nAppointment:${rightTable[index].time}`;
+  infoTextarea.innerHTML += `\nDoctor: ${rightTable[index].doctorId}`;
+  if (rightTable[index].time)
+    infoTextarea.innerHTML += `\nAppointment:${rightTable[index].time}`;
 };
 function sortCallback(item1, item2) {
   if (item1.patientId !== item2.patientId)
